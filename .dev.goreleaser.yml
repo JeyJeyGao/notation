@@ -58,5 +58,11 @@ archives:
     files:
       - LICENSE
 release:
-  draft: true
+  draft: false
   prerelease: auto
+  header: |
+    ## {{ .ProjectName }} Weekly Release ({{ .Date }})
+
+    Welcome to this new release! {{ .Version }}.dev.{{ time "20060102" }}
+
+  name_template: 'v{{ .Version }}.dev.{{ time "20060102" }}'

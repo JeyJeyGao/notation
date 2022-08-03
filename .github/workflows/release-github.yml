@@ -3,7 +3,7 @@ name: release-github
 on:
   push:
     tags:
-      - v*
+      - w*
   workflow_dispatch:
 
 jobs:
