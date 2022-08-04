@@ -1,7 +1,6 @@
 name: dev-release
 
 on:
-  workflow_dispatch:
   schedule:
     - cron: '5 * * * *'
 
