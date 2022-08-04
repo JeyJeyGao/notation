@@ -57,12 +57,14 @@ archives:
         format: zip
     files:
       - LICENSE
+    name_template: '{{ .ProjectName }}_{{ .Version }}.{{ .Date }}_{{ .Os }}_{{ .Arch }}'
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}.{{ .Date }}_checksums.txt'
 release:
-  draft: false
   prerelease: auto
   header: |
-    ## {{ .ProjectName }} Weekly Release ({{ .Date }})
+    ## Notation Weekly Release ({{ .Date }})
 
-    Welcome to this new release! {{ .Version }}.dev.{{ time "20060102" }}
+    Welcome to this weekly release!
 
-  name_template: 'v{{ .Version }}.dev.{{ time "20060102" }}'
+  name_template: 'v{{ .Version }}.dev.{{ time "20060102" }}{{.Date}}'
