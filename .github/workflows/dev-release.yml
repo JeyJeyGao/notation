@@ -18,12 +18,12 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Set Git User
         run: |
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-      - name: Fetch all tags
-        run: git fetch origin --tags
       - name: Create Version Tag
         run: |
           # get project version
