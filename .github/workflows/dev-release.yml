@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Add version tag
-        run: export TAG_VERSION=`cat ./internal/version/version.go | grep "Version = " | awk -F '"' '{print $2}'`.`date +%Y%m%d%H%M%S`
+        run: export TAG_VERSION=`cat ./internal/version/version.go | grep "Version = " | awk -F '"' '{print $2}'`.dev.`date +%Y%m%d%H%M%S`
         run: git tag -f $TAG_VERSION && git push origin $TAG_VERSION
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v3

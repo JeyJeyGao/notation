@@ -65,5 +65,3 @@ release:
     ## Notation Weekly Release ({{ .Date }})
 
     Welcome to this weekly release!
-
-  name_template: 'v{{ .Version }}.dev.{{ time "20060102" }}{{.Date}}'
