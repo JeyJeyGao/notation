@@ -23,7 +23,7 @@ jobs:
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           export TAG_VERSION=`cat ./internal/version/version.go | grep "Version = " | awk -F '"' '{print $2}'`.dev.`date +%Y%m%d%H%M%S`
-          git tag -f $TAG_VERSION -m "for weekly build"
+          git tag -af $TAG_VERSION -m "For weekly build"
           git push origin $TAG_VERSION
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v3
