@@ -21,7 +21,7 @@ jobs:
       - name: Create Version Tag
         run: |
           export TAG_VERSION=`cat ./internal/version/version.go | grep "Version = " | awk -F '"' '{print $2}'`.dev.`date +%Y%m%d%H%M%S`
-          g -f ./.dev.it tag -f $TAG_VERSION && git push origin $TAG_VERSION
+          git -f ./.dev.it tag -f $TAG_VERSION && git push origin $TAG_VERSION
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v3
         with:
