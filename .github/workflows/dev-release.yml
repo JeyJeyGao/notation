@@ -1,9 +1,6 @@
 name: dev-release
 
 on:
-  push:
-    tags:
-      - w*
   workflow_dispatch:
 
 jobs:
