@@ -18,11 +18,18 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Create Version Tag
+      - name: Set Git User
         run: |
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+      - name: Fetch all tags
+        run: git fetch origin --tags
+      - name: Create Version Tag
+        run: |
+          # get project version
           export TAG_VERSION=`cat ./internal/version/version.go | grep "Version = " | awk -F '"' '{print $2}'`.dev.`date +%Y%m%d%H%M%S`
+
+          # create new tag
           git tag -af $TAG_VERSION -m "For weekly build"
           git push origin $TAG_VERSION
       - name: Run GoReleaser
