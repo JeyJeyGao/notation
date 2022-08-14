@@ -3,6 +3,7 @@ name: dev-release
 on:
   schedule:
     - cron: '5 * * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -33,6 +34,7 @@ jobs:
           # create new tag
           git tag -af $TAG_VERSION -m "For weekly build"
           git push origin $TAG_VERSION
+          git describe
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v3
         with:
