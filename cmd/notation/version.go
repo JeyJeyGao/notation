@@ -15,14 +15,15 @@ func versionCommand() *cobra.Command {
 		Short: "Show the notation version information",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runVersion()
+			runVersion()
+			return nil
 		},
 	}
 
 	return cmd
 }
 
-func runVersion() error {
+func runVersion() {
 	fmt.Printf("Notation: Notary v2, A tool to sign, store, and verify artifacts.\n\n")
 
 	fmt.Printf("Version:     %s\n", version.Version)
@@ -35,5 +36,5 @@ func runVersion() error {
 			fmt.Printf("Git commit:  %s\n", metadata[0])
 		}
 	}
-	return nil
+	return
 }
