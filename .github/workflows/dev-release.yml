@@ -34,11 +34,19 @@ jobs:
           # create new tag
           git tag -af $TAG_VERSION -m "For weekly build"
           git push origin $TAG_VERSION
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v3
+      # - name: Run GoReleaser
+      #   uses: goreleaser/goreleaser-action@v3
+      #   with:
+      #     distribution: goreleaser
+      #     version: latest
+      #     args: release -f ./.dev.goreleaser.yml --rm-dist
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: delete old dev release
+        uses: dev-drprasad/delete-older-releases@v0.2.0
         with:
-          distribution: goreleaser
-          version: latest
-          args: release -f ./.dev.goreleaser.yml --rm-dist
+          repo: <owner>/<repoName> # defaults to current repo
+          keep_latest: 1
+          delete_tag_pattern: ".dev.[0-9]{8}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
