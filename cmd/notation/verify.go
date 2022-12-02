@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"math"
 	"os"
 	"strings"
@@ -68,7 +70,7 @@ func runVerify(command *cobra.Command, opts *verifyOpts) error {
 	}
 
 	// resolve the given reference and set the digest.
-	ref, err := resolveReference(command, opts)
+	ref, err := resolveReference(ctx, opts.reference, &opts.SecureFlagOpts)
 	if err != nil {
 		return err
 	}
@@ -99,22 +101,23 @@ func runVerify(command *cobra.Command, opts *verifyOpts) error {
 	return ioutil.PrintVerificationResults(os.Stdout, outcomes, err, ref.Reference)
 }
 
-func resolveReference(command *cobra.Command, opts *verifyOpts) (registry.Reference, error) {
-	ref, err := registry.ParseReference(opts.reference)
+func resolveReference(ctx context.Context, reference string, SecureFlagOpts *SecureFlagOpts) (registry.Reference, error) {
+	ref, err := registry.ParseReference(reference)
 	if err != nil {
 		return registry.Reference{}, err
 	}
 
-	if isDigestReference(opts.reference) {
+	if isDigestReference(reference) {
 		return ref, nil
 	}
+	fmt.Printf("Warning: Always sign the artifact using digest(`@sha256:...`) rather than a tag(`:%s`) because tags are mutable and a tag reference can point to a different artifact than the one signed\n", ref.Reference)
 
 	// Resolve tag reference to digest reference.
-	manifestDesc, err := getManifestDescriptorFromReference(command.Context(), &opts.SecureFlagOpts, opts.reference, opts.Debug)
+	manifestDesc, err := getManifestDescriptorFromReference(ctx, SecureFlagOpts, reference)
 	if err != nil {
 		return registry.Reference{}, err
 	}
-
+	fmt.Printf("Resolved artifact tag `%s` to digest `%s` before signing\n", ref.Reference, manifestDesc.Digest.String())
 	ref.Reference = manifestDesc.Digest.String()
 	return ref, nil
 }
