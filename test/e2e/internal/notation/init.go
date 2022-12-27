@@ -19,6 +19,7 @@ const (
 	envRegistryUsername    = "NOTATION_E2E_REGISTRY_USERNAME"
 	envRegistryPassword    = "NOTATION_E2E_REGISTRY_PASSWORD"
 	envNotationBinPath     = "NOTATION_E2E_BINARY_PATH"
+	envNotationOldBinPath  = "NOTATION_E2E_OLD_BINARY_PATH"
 	envNotationE2EKeyPath  = "NOTATION_E2E_KEY_PATH"
 	envNotationE2ECertPath = "NOTATION_E2E_CERT_PATH"
 	envNotationConfigPath  = "NOTATION_E2E_CONFIG_PATH"
@@ -29,7 +30,11 @@ const (
 )
 
 var (
-	NotationBinPath           string
+	// NotationBinPath is the notation binary path.
+	NotationBinPath string
+	// NotationOldBinPath is the path of an old version notation binary for
+	// testing forward compatibility.
+	NotationOldBinPath        string
 	NotationE2EKeyPath        string
 	NotationE2ECertPath       string
 	NotationE2EConfigPath     string
@@ -73,6 +78,7 @@ func setUpRegistry() {
 func setUpNotationValues() {
 	// set Notation binary path
 	setPathValue(envNotationBinPath, &NotationBinPath)
+	setPathValue(envNotationOldBinPath, &NotationOldBinPath)
 
 	// set Notation configuration paths
 	setPathValue(envNotationE2EKeyPath, &NotationE2EKeyPath)

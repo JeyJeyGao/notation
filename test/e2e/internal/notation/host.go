@@ -13,14 +13,11 @@ import (
 // options is the required testing environment options
 // fn is the callback function containing the testing logic.
 func Host(options []utils.HostOption, fn func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost)) {
-	// create a vhost
-	vhost, err := utils.NewVirtualHost(NotationBinPath, CreateNotationDirOption())
+	// create a notation vhost
+	vhost, err := createNotationHost(NotationBinPath, options...)
 	if err != nil {
 		panic(err)
 	}
-
-	// set additional options
-	vhost.SetOption(options...)
 
 	// generate a repository with an artifact
 	artifact := GenerateArtifact()
@@ -32,6 +29,31 @@ func Host(options []utils.HostOption, fn func(notation *utils.ExecOpts, artifact
 	if err := artifact.Remove(); err != nil {
 		panic(err)
 	}
+}
+
+// OldNotation create a notation ExecOpts for testing forward compatibility.
+func OldNotation(options ...utils.HostOption) *utils.ExecOpts {
+	if len(options) == 0 {
+		options = BaseOptions()
+	}
+
+	vhost, err := createNotationHost(NotationOldBinPath, options...)
+	if err != nil {
+		panic(err)
+	}
+
+	return vhost.Executor
+}
+
+func createNotationHost(path string, options ...utils.HostOption) (*utils.VirtualHost, error) {
+	vhost, err := utils.NewVirtualHost(path, CreateNotationDirOption())
+	if err != nil {
+		return nil, err
+	}
+
+	// set additional options
+	vhost.SetOption(options...)
+	return vhost, nil
 }
 
 // Opts is a grammar sugar to generate a list of HostOption

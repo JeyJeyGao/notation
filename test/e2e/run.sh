@@ -1,9 +1,39 @@
 #!/bin/bash -e
 
-export NOTATION_E2E_BINARY_PATH=$(realpath $1)
+# check notation binary path.
+export NOTATION_E2E_BINARY_PATH=$(if [ ! -z "$1" ]; then realpath $1; fi)
 if [ ! -f "$NOTATION_E2E_BINARY_PATH" ];then
-    echo "run.sh <notation-binary-path>"
+    echo "notation binary path doesn't exist."
+    echo ""
+    echo "run.sh <notation-binary-path> [old-notation-binary-path]"
     exit 1
+fi
+
+# check old notation binary path for forward compatibility test.
+export NOTATION_E2E_OLD_BINARY_PATH=$(if [ ! -z "$2" ]; then realpath $2; fi)
+if [ ! -f "$NOTATION_E2E_OLD_BINARY_PATH" ];then
+    OLD_NOTATION_DIR=/tmp/notation_old
+    export NOTATION_E2E_OLD_BINARY_PATH=$OLD_NOTATION_DIR/notation
+    mkdir -p $OLD_NOTATION_DIR
+
+    echo "Old notation binary path doesn't exist."
+    echo "Try to use old notation binary at $NOTATION_E2E_OLD_BINARY_PATH"
+
+    if [ ! -f $NOTATION_E2E_OLD_BINARY_PATH ]; then
+        TAG=1.0.0-rc.1 # without 'v'
+        echo "Didn't find old notation binary locally. Try to download notation v$TAG."
+
+        TAR_NAME=notation_${TAG}_linux_amd64.tar.gz
+        URL=https://github.com/notaryproject/notation/releases/download/v${TAG}/$TAR_NAME
+        wget $URL -P $OLD_NOTATION_DIR
+        tar -xf $OLD_NOTATION_DIR/$TAR_NAME -C $OLD_NOTATION_DIR
+
+        if [ ! -f $NOTATION_E2E_OLD_BINARY_PATH ]; then
+            echo "Failed to download old notation binary for forward compatibility test."
+            exit 1
+        fi
+        echo "Downloaded notation v$TAG at $NOTATION_E2E_OLD_BINARY_PATH"
+    fi
 fi
 
 # install dependency
@@ -42,4 +72,4 @@ function cleanup {
 trap cleanup EXIT
 
 # run tests
-ginkgo -r -p -v
+ginkgo -r -p

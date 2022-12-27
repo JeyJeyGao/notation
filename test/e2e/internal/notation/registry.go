@@ -3,18 +3,15 @@ package notation
 import (
 	"context"
 	"fmt"
+	"math"
+	"math/rand"
 	"net/url"
 	"os"
 	"path/filepath"
-	"sync/atomic"
 
 	"oras.land/oras-go/v2/registry"
 	"oras.land/oras-go/v2/registry/remote"
 	"oras.land/oras-go/v2/registry/remote/auth"
-)
-
-var (
-	repoId int64 = 0
 )
 
 const (
@@ -40,7 +37,7 @@ type Artifact struct {
 // GenerateArtifact generates a new image with a new repository.
 func GenerateArtifact() *Artifact {
 	// generate new newRepo
-	newRepo := fmt.Sprintf("%s-%d", testRepo, genRepoId())
+	newRepo := newRepoId()
 
 	// copy oci layout to the new repo
 	if err := copyDir(filepath.Join(OCILayoutPath, testRepo), filepath.Join(RegistryStoragePath, newRepo)); err != nil {
@@ -134,10 +131,22 @@ func (r *Artifact) ReferenceWithDigest() string {
 
 // Reference removes the the repository of the artifact.
 func (r *Artifact) Remove() error {
-	return os.RemoveAll(filepath.Join(OCILayoutPath, r.Repo))
+	return os.RemoveAll(filepath.Join(RegistryStoragePath, r.Repo))
 }
 
-// genRepoId returns a new repoId
-func genRepoId() int64 {
-	return atomic.AddInt64(&repoId, 1)
+func newRepoId() string {
+	var newRepo string
+	for {
+		newRepo = fmt.Sprintf("%s-%d", testRepo, rand.Intn(math.MaxInt))
+		// if repo exists, generate a new one.
+		_, err := os.Stat(filepath.Join(RegistryStoragePath, newRepo))
+		if err != nil {
+			if os.IsNotExist(err) {
+				// repo doesn't exist.
+				break
+			}
+			panic(err)
+		}
+	}
+	return newRepo
 }
