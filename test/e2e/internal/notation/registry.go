@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"time"
 
 	"oras.land/oras-go/v2/registry"
 	"oras.land/oras-go/v2/registry/remote"
@@ -85,7 +86,6 @@ func (r *Artifact) fetchDigest() error {
 	ref, err := registry.ParseReference(r.ReferenceWithTag())
 	if err != nil {
 		return err
-
 	}
 	authClient := &auth.Client{
 		Credential: func(ctx context.Context, registry string) (auth.Credential, error) {
@@ -137,8 +137,14 @@ func (r *Artifact) Remove() error {
 func newRepoId() string {
 	var newRepo string
 	for {
-		newRepo = fmt.Sprintf("%s-%d", testRepo, rand.Intn(math.MaxInt))
-		// if repo exists, generate a new one.
+		// set the seed with nanosecond precision.
+		rand.Seed(time.Now().UnixNano())
+		newRepo = fmt.Sprintf("%s-%d", testRepo, rand.Intn(math.MaxInt32))
+
+		// do the path existence check. Even with the check, it doesn't
+		// guaranty generate unique repoId because we cannot prevent multiple
+		// processes enter the check at the same moment with the same newRepo,
+		// however, the possibility is very low.
 		_, err := os.Stat(filepath.Join(RegistryStoragePath, newRepo))
 		if err != nil {
 			if os.IsNotExist(err) {

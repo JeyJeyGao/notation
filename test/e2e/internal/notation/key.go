@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	signingKeysName  = "signingkeys.json"
-	localkeysDirName = "localkeys"
+	SigningKeysName  = "signingkeys.json"
+	LocalkeysDirName = "localkeys"
 )
 
 // X509KeyPair contains the paths of a public/private key pair files.
@@ -34,12 +34,12 @@ func AddTestKeyPairs(dir string) error {
 	// create signingkeys.json files
 	if err := saveJSON(
 		genTestSigningKey(dir),
-		filepath.Join(dir, signingKeysName)); err != nil {
+		filepath.Join(dir, SigningKeysName)); err != nil {
 		return err
 	}
 
 	// create localkeys directory
-	localKeysDir := filepath.Join(dir, localkeysDirName)
+	localKeysDir := filepath.Join(dir, LocalkeysDirName)
 	os.MkdirAll(localKeysDir, os.ModePerm)
 	if err := copyFile(NotationE2EKeyPath, filepath.Join(localKeysDir, "e2e.key")); err != nil {
 		return err

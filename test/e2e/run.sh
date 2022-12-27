@@ -72,4 +72,4 @@ function cleanup {
 trap cleanup EXIT
 
 # run tests
-ginkgo -r -p
+ginkgo -r -p -v

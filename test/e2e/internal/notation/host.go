@@ -67,7 +67,7 @@ func BaseOptions() []utils.HostOption {
 	return Opts(
 		AuthOption("", ""),
 		AddTestKeyOption(),
-		AddTestTrustStoreOption(),
+		AddTestTrustStoreOption("e2e", NotationE2ECertPath),
 		AddTrustPolicyOption("trustpolicy.json"),
 	)
 }
@@ -102,10 +102,10 @@ func AddTestKeyOption() utils.HostOption {
 }
 
 // AddTestTrustStoreOption added the test cert to the trust store.
-func AddTestTrustStoreOption() utils.HostOption {
+func AddTestTrustStoreOption(namedstore string, srcCertPath string) utils.HostOption {
 	return func(vhost *utils.VirtualHost) error {
 		vhost.Executor.
-			Exec("cert", "add", "--type", "ca", "--store", "e2e", NotationE2ECertPath).
+			Exec("cert", "add", "--type", "ca", "--store", namedstore, srcCertPath).
 			MatchKeyWords("Successfully added following certificates")
 		return nil
 	}
@@ -116,7 +116,7 @@ func AddTrustPolicyOption(trustpolicyName string) utils.HostOption {
 	return func(vhost *utils.VirtualHost) error {
 		return copyFile(
 			filepath.Join(NotationE2ETrustPolicyDir, trustpolicyName),
-			vhost.UserPath(NotationDirName, NotationTrustPolicyName),
+			vhost.UserPath(NotationDirName, TrustPolicyName),
 		)
 	}
 }

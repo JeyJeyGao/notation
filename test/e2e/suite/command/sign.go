@@ -16,7 +16,7 @@ var _ = Describe("notation sign", func() {
 				MatchKeyWords("Successfully signed")
 
 			OldNotation().WithDescription("verify by digest").
-				Exec("verify", artifact.ReferenceWithTag()).
+				Exec("verify", artifact.ReferenceWithDigest()).
 				MatchKeyWords("Successfully verified")
 
 			OldNotation().WithDescription("verify by tag").
@@ -73,7 +73,11 @@ var _ = Describe("notation sign", func() {
 			notation.Exec("sign", "--key", keyName, artifact.ReferenceWithDigest()).
 				MatchKeyWords("Successfully signed")
 
-			OldNotation().Exec("verify", artifact.ReferenceWithTag()).
+			// copy the generated cert file and create the new trust policy for verify signature with generated new key.
+			OldNotation(AuthOption("", ""),
+				AddTestTrustStoreOption(keyName, vhost.UserPath(NotationDirName, LocalkeysDirName, keyName+".crt")),
+				AddTrustPolicyOption("generate_test_trustpolicy.json"),
+			).Exec("verify", artifact.ReferenceWithTag()).
 				MatchKeyWords("Successfully verified")
 		})
 	})
@@ -88,15 +92,16 @@ var _ = Describe("notation sign", func() {
 		})
 	})
 
-	It("sign with expiry in 3s", func() {
+	It("sign with expiry in 2s", func() {
 		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
-			notation.Exec("sign", "--expiry", "3s", artifact.ReferenceWithDigest()).
+			notation.Exec("sign", "--expiry", "2s", artifact.ReferenceWithDigest()).
 				MatchKeyWords("Successfully signed")
 
-			// sleep 4s to wait for expiry
-			time.Sleep(4 * time.Second)
+			// sleep to wait for expiry
+			time.Sleep(2100 * time.Millisecond)
 
 			OldNotation().ExpectFailure().Exec("verify", artifact.ReferenceWithDigest(), "-v").
+				MatchErrKeyWords("expiry validation failed.").
 				MatchErrKeyWords("signature verification failed for all the signatures")
 		})
 	})
