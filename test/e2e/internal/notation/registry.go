@@ -35,13 +35,20 @@ type Artifact struct {
 	Digest string
 }
 
-// GenerateArtifact generates a new image with a new repository.
-func GenerateArtifact() *Artifact {
-	// generate new newRepo
-	newRepo := newRepoId()
+// GenerateArtifact generates a new artifact with a new repository by copying
+// the source repository in the OCILayoutPath to be a new repository.
+func GenerateArtifact(srcRepo, newRepo string) *Artifact {
+	if srcRepo == "" {
+		srcRepo = TestRepo
+	}
+
+	if newRepo == "" {
+		// generate new repo
+		newRepo = newRepoName()
+	}
 
 	// copy oci layout to the new repo
-	if err := copyDir(filepath.Join(OCILayoutPath, testRepo), filepath.Join(RegistryStoragePath, newRepo)); err != nil {
+	if err := copyDir(filepath.Join(OCILayoutPath, srcRepo), filepath.Join(RegistryStoragePath, newRepo)); err != nil {
 		panic(err)
 	}
 
@@ -134,7 +141,7 @@ func (r *Artifact) Remove() error {
 	return os.RemoveAll(filepath.Join(RegistryStoragePath, r.Repo))
 }
 
-func newRepoId() string {
+func newRepoName() string {
 	var newRepo string
 	for {
 		// set the seed with nanosecond precision.
