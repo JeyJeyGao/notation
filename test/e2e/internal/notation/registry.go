@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
+	. "github.com/onsi/ginkgo/v2"
 	"oras.land/oras-go/v2/registry"
 	"oras.land/oras-go/v2/registry/remote"
 	"oras.land/oras-go/v2/registry/remote/auth"
@@ -69,6 +70,9 @@ func GenerateArtifact(srcRepo, newRepo string) *Artifact {
 	if err := artifact.fetchDigest(); err != nil {
 		panic(err)
 	}
+
+	// cleanup the artifact automatically
+	DeferCleanup(artifact.Remove)
 
 	return artifact
 }

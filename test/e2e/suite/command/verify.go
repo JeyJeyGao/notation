@@ -5,36 +5,35 @@ import (
 
 	. "github.com/notaryproject/notation/test/e2e/internal/notation"
 	"github.com/notaryproject/notation/test/e2e/internal/utils"
+	. "github.com/notaryproject/notation/test/e2e/suite/common"
 	. "github.com/onsi/ginkgo/v2"
 )
-
-const verifyMessage = "Successfully verified"
 
 var _ = Describe("notation verify", func() {
 	It("verify by digest", func() {
 		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
 			OldNotation().Exec("sign", artifact.ReferenceWithDigest()).
-				MatchKeyWords(signMessage)
+				MatchKeyWords(SuccessfullySigned)
 
 			notation.Exec("verify", artifact.ReferenceWithDigest()).
-				MatchKeyWords(verifyMessage)
+				MatchKeyWords(SuccessfullyVerified)
 		})
 	})
 
 	It("verify by tag", func() {
 		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
 			OldNotation().Exec("sign", artifact.ReferenceWithDigest()).
-				MatchKeyWords(signMessage)
+				MatchKeyWords(SuccessfullySigned)
 
 			notation.Exec("verify", artifact.ReferenceWithTag()).
-				MatchKeyWords(verifyMessage)
+				MatchKeyWords(SuccessfullyVerified)
 		})
 	})
 
 	It("verify with debug log", func() {
 		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
 			OldNotation().Exec("sign", artifact.ReferenceWithDigest()).
-				MatchKeyWords(signMessage)
+				MatchKeyWords(SuccessfullySigned)
 
 			notation.Exec("verify", artifact.ReferenceWithDigest(), "-d").
 				// debug log message outputs to stderr
@@ -47,7 +46,7 @@ var _ = Describe("notation verify", func() {
 					"Validating authentic timestamp",
 					"Validating revocation",
 				).
-				MatchKeyWords(verifyMessage)
+				MatchKeyWords(SuccessfullyVerified)
 		})
 	})
 })

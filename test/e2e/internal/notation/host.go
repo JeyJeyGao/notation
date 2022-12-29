@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 
 	"github.com/notaryproject/notation/test/e2e/internal/utils"
-	. "github.com/onsi/ginkgo/v2"
 )
 
 // Host creates a virtualized notation testing host by modify
@@ -22,7 +21,6 @@ func Host(options []utils.HostOption, fn func(notation *utils.ExecOpts, artifact
 
 	// generate a repository with an artifact
 	artifact := GenerateArtifact("", "")
-	DeferCleanup(artifact.Remove)
 
 	// run the main logic
 	fn(vhost.Executor, artifact, vhost)
