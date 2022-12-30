@@ -26,7 +26,8 @@ func Host(options []utils.HostOption, fn func(notation *utils.ExecOpts, artifact
 	fn(vhost.Executor, artifact, vhost)
 }
 
-// OldNotation create a notation ExecOpts for testing forward compatibility.
+// OldNotation create a notation ExecOpts in a new VirtualHost
+// for testing forward compatibility.
 func OldNotation(options ...utils.HostOption) *utils.ExecOpts {
 	if len(options) == 0 {
 		options = BaseOptions()
@@ -61,8 +62,8 @@ func Opts(options ...utils.HostOption) []utils.HostOption {
 func BaseOptions() []utils.HostOption {
 	return Opts(
 		AuthOption("", ""),
-		AddTestKeyOption(),
-		AddTestTrustStoreOption("e2e", NotationE2ECertPath),
+		AddKeyOption("e2e.key", "e2e.crt"),
+		AddTrustStoreOption("e2e", filepath.Join(NotationE2ELocalKeysDir, "e2e.crt")),
 		AddTrustPolicyOption("trustpolicy.json"),
 	)
 }
@@ -88,16 +89,16 @@ func AuthOption(username, password string) utils.HostOption {
 	}
 }
 
-// AddTestKeyOption adds the test signingkeys.json, key and cert files to
+// AddKeyOption adds the test signingkeys.json, key and cert files to
 // the notation directory.
-func AddTestKeyOption() utils.HostOption {
+func AddKeyOption(keyName, certName string) utils.HostOption {
 	return func(vhost *utils.VirtualHost) error {
-		return AddTestKeyPairs(vhost.UserPath(NotationDirName))
+		return AddTestKeyPairs(vhost.UserPath(NotationDirName), keyName, certName)
 	}
 }
 
-// AddTestTrustStoreOption added the test cert to the trust store.
-func AddTestTrustStoreOption(namedstore string, srcCertPath string) utils.HostOption {
+// AddTrustStoreOption added the test cert to the trust store.
+func AddTrustStoreOption(namedstore string, srcCertPath string) utils.HostOption {
 	return func(vhost *utils.VirtualHost) error {
 		vhost.Executor.
 			Exec("cert", "add", "--type", "ca", "--store", namedstore, srcCertPath).

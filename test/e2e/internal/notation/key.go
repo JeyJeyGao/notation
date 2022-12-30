@@ -7,7 +7,7 @@ import (
 
 const (
 	SigningKeysName  = "signingkeys.json"
-	LocalkeysDirName = "localkeys"
+	LocalKeysDirName = "localkeys"
 )
 
 // X509KeyPair contains the paths of a public/private key pair files.
@@ -30,7 +30,7 @@ type SigningKeys struct {
 
 // AddTestKeyPairs creates the signingkeys.json file and the localkeys directory
 // with e2e.key and e2e.crt
-func AddTestKeyPairs(dir string) error {
+func AddTestKeyPairs(dir, keyName, certName string) error {
 	// create signingkeys.json files
 	if err := saveJSON(
 		genTestSigningKey(dir),
@@ -39,12 +39,14 @@ func AddTestKeyPairs(dir string) error {
 	}
 
 	// create localkeys directory
-	localKeysDir := filepath.Join(dir, LocalkeysDirName)
+	localKeysDir := filepath.Join(dir, LocalKeysDirName)
 	os.MkdirAll(localKeysDir, os.ModePerm)
-	if err := copyFile(NotationE2EKeyPath, filepath.Join(localKeysDir, "e2e.key")); err != nil {
+
+	// copy key and cert files
+	if err := copyFile(filepath.Join(NotationE2ELocalKeysDir, keyName), filepath.Join(localKeysDir, "e2e.key")); err != nil {
 		return err
 	}
-	return copyFile(NotationE2ECertPath, filepath.Join(localKeysDir, "e2e.crt"))
+	return copyFile(filepath.Join(NotationE2ELocalKeysDir, certName), filepath.Join(localKeysDir, "e2e.crt"))
 }
 
 func genTestSigningKey(dir string) *SigningKeys {

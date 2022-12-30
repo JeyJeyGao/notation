@@ -13,27 +13,27 @@ var _ = Describe("notation verify", func() {
 	It("verify by digest", func() {
 		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
 			OldNotation().Exec("sign", artifact.ReferenceWithDigest()).
-				MatchKeyWords(SuccessfullySigned)
+				MatchKeyWords(SignSuccessfully)
 
 			notation.Exec("verify", artifact.ReferenceWithDigest()).
-				MatchKeyWords(SuccessfullyVerified)
+				MatchKeyWords(VerifySuccessfully)
 		})
 	})
 
 	It("verify by tag", func() {
 		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
 			OldNotation().Exec("sign", artifact.ReferenceWithDigest()).
-				MatchKeyWords(SuccessfullySigned)
+				MatchKeyWords(SignSuccessfully)
 
 			notation.Exec("verify", artifact.ReferenceWithTag()).
-				MatchKeyWords(SuccessfullyVerified)
+				MatchKeyWords(VerifySuccessfully)
 		})
 	})
 
 	It("verify with debug log", func() {
 		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
 			OldNotation().Exec("sign", artifact.ReferenceWithDigest()).
-				MatchKeyWords(SuccessfullySigned)
+				MatchKeyWords(SignSuccessfully)
 
 			notation.Exec("verify", artifact.ReferenceWithDigest(), "-d").
 				// debug log message outputs to stderr
@@ -46,7 +46,7 @@ var _ = Describe("notation verify", func() {
 					"Validating authentic timestamp",
 					"Validating revocation",
 				).
-				MatchKeyWords(SuccessfullyVerified)
+				MatchKeyWords(VerifySuccessfully)
 		})
 	})
 })

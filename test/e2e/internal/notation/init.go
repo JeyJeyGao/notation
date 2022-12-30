@@ -22,8 +22,6 @@ const (
 	envRegistryPassword    = "NOTATION_E2E_REGISTRY_PASSWORD"
 	envNotationBinPath     = "NOTATION_E2E_BINARY_PATH"
 	envNotationOldBinPath  = "NOTATION_E2E_OLD_BINARY_PATH"
-	envNotationE2EKeyPath  = "NOTATION_E2E_KEY_PATH"
-	envNotationE2ECertPath = "NOTATION_E2E_CERT_PATH"
 	envNotationConfigPath  = "NOTATION_E2E_CONFIG_PATH"
 	envOCILayoutPath       = "NOTATION_E2E_OCI_LAYOUT_PATH"
 	envTestRepo            = "NOTATION_E2E_TEST_REPO"
@@ -37,9 +35,8 @@ var (
 	// NotationOldBinPath is the path of an old version notation binary for
 	// testing forward compatibility.
 	NotationOldBinPath        string
-	NotationE2EKeyPath        string
-	NotationE2ECertPath       string
 	NotationE2EConfigPath     string
+	NotationE2ELocalKeysDir   string
 	NotationE2ETrustPolicyDir string
 )
 
@@ -83,10 +80,9 @@ func setUpNotationValues() {
 	setPathValue(envNotationOldBinPath, &NotationOldBinPath)
 
 	// set Notation configuration paths
-	setPathValue(envNotationE2EKeyPath, &NotationE2EKeyPath)
-	setPathValue(envNotationE2ECertPath, &NotationE2ECertPath)
 	setPathValue(envNotationConfigPath, &NotationE2EConfigPath)
 	NotationE2ETrustPolicyDir = filepath.Join(NotationE2EConfigPath, "trustpolicys")
+	NotationE2ELocalKeysDir = filepath.Join(NotationE2EConfigPath, LocalKeysDirName)
 
 	// set registry values
 	setPathValue(envRegistryStoragePath, &RegistryStoragePath)

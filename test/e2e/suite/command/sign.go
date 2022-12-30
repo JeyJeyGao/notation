@@ -14,30 +14,30 @@ var _ = Describe("notation sign", func() {
 	It("sign digest", func() {
 		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
 			notation.Exec("sign", artifact.ReferenceWithDigest()).
-				MatchKeyWords(SuccessfullySigned)
+				MatchKeyWords(SignSuccessfully)
 
 			OldNotation().WithDescription("verify by digest").
 				Exec("verify", artifact.ReferenceWithDigest()).
-				MatchKeyWords(SuccessfullyVerified)
+				MatchKeyWords(VerifySuccessfully)
 
 			OldNotation().WithDescription("verify by tag").
 				Exec("verify", artifact.ReferenceWithTag()).
-				MatchKeyWords(SuccessfullyVerified)
+				MatchKeyWords(VerifySuccessfully)
 		})
 	})
 
 	It("sign digest in COSE format", func() {
 		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
 			notation.Exec("sign", "--signature-format", "cose", artifact.ReferenceWithDigest()).
-				MatchKeyWords(SuccessfullySigned)
+				MatchKeyWords(SignSuccessfully)
 
 			OldNotation().WithDescription("verify by digest").
 				Exec("verify", artifact.ReferenceWithTag()).
-				MatchKeyWords(SuccessfullyVerified)
+				MatchKeyWords(VerifySuccessfully)
 
 			OldNotation().WithDescription("verify by tag").
 				Exec("verify", artifact.ReferenceWithTag()).
-				MatchKeyWords(SuccessfullyVerified)
+				MatchKeyWords(VerifySuccessfully)
 		})
 	})
 
@@ -45,11 +45,11 @@ var _ = Describe("notation sign", func() {
 		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
 			notation.WithDescription("sign with JWS").
 				Exec("sign", artifact.ReferenceWithTag(), "--signature-format", "jws").
-				MatchKeyWords(SuccessfullySigned)
+				MatchKeyWords(SignSuccessfully)
 
 			OldNotation().WithDescription("verify JWS signature").
 				Exec("verify", artifact.ReferenceWithTag()).
-				MatchKeyWords(SuccessfullyVerified)
+				MatchKeyWords(VerifySuccessfully)
 		})
 	})
 
@@ -57,11 +57,11 @@ var _ = Describe("notation sign", func() {
 		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
 			notation.WithDescription("sign with COSE").
 				Exec("sign", artifact.ReferenceWithTag(), "--signature-format", "cose").
-				MatchKeyWords(SuccessfullySigned)
+				MatchKeyWords(SignSuccessfully)
 
 			OldNotation().WithDescription("verify COSE signature").
 				Exec("verify", artifact.ReferenceWithTag()).
-				MatchKeyWords(SuccessfullyVerified)
+				MatchKeyWords(VerifySuccessfully)
 		})
 	})
 
@@ -72,31 +72,31 @@ var _ = Describe("notation sign", func() {
 				MatchKeyWords(fmt.Sprintf("notation/localkeys/%s.crt", keyName))
 
 			notation.Exec("sign", "--key", keyName, artifact.ReferenceWithDigest()).
-				MatchKeyWords(SuccessfullySigned)
+				MatchKeyWords(SignSuccessfully)
 
 			// copy the generated cert file and create the new trust policy for verify signature with generated new key.
 			OldNotation(AuthOption("", ""),
-				AddTestTrustStoreOption(keyName, vhost.UserPath(NotationDirName, LocalkeysDirName, keyName+".crt")),
+				AddTrustStoreOption(keyName, vhost.UserPath(NotationDirName, LocalKeysDirName, keyName+".crt")),
 				AddTrustPolicyOption("generate_test_trustpolicy.json"),
 			).Exec("verify", artifact.ReferenceWithTag()).
-				MatchKeyWords(SuccessfullyVerified)
+				MatchKeyWords(VerifySuccessfully)
 		})
 	})
 
 	It("sign with expiry in 24h", func() {
 		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
 			notation.Exec("sign", "--expiry", "24h", artifact.ReferenceWithDigest()).
-				MatchKeyWords(SuccessfullySigned)
+				MatchKeyWords(SignSuccessfully)
 
 			OldNotation().Exec("verify", artifact.ReferenceWithTag()).
-				MatchKeyWords(SuccessfullyVerified)
+				MatchKeyWords(VerifySuccessfully)
 		})
 	})
 
 	It("sign with expiry in 2s", func() {
 		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
 			notation.Exec("sign", "--expiry", "2s", artifact.ReferenceWithDigest()).
-				MatchKeyWords(SuccessfullySigned)
+				MatchKeyWords(SignSuccessfully)
 
 			// sleep to wait for expiry
 			time.Sleep(2100 * time.Millisecond)
