@@ -108,10 +108,14 @@ var _ = Describe("notation trust policy test", func() {
 	})
 
 	It("test strict signatureVerification level with invalid authenticity", func() {
-		Host(BaseOptions(), func(notation *utils.ExecOpts, _ *Artifact, vhost *utils.VirtualHost) {
+		Host(nil, func(notation *utils.ExecOpts, _ *Artifact, vhost *utils.VirtualHost) {
+			vhost.SetOption(AuthOption("", ""),
+				AddTrustPolicyOption("trustpolicy.json"),
+				AddTestTrustStoreOption("e2e", filepath.Join(NotationE2EConfigPath, LocalkeysDirName, "new_e2e.crt")))
+
 			// the artifact signed with a different cert from the cert in
 			// trust store.
-			artifact := GenerateArtifact("e2e-with-expired-cert", "")
+			artifact := GenerateArtifact("e2e-valid-signature", "")
 
 			notation.ExpectFailure().Exec("verify", artifact.ReferenceWithDigest(), "-v").
 				MatchErrKeyWords("authenticity validation failed",
@@ -158,11 +162,14 @@ var _ = Describe("notation trust policy test", func() {
 	})
 
 	It("test permissive signatureVerification level with invalid authenticity", func() {
-		Host(BaseOptions(), func(notation *utils.ExecOpts, _ *Artifact, vhost *utils.VirtualHost) {
-			vhost.SetOption(AddTrustPolicyOption("permissive_trustpolicy.json"))
+		Host(nil, func(notation *utils.ExecOpts, _ *Artifact, vhost *utils.VirtualHost) {
+			vhost.SetOption(AuthOption("", ""),
+				AddTrustPolicyOption("permissive_trustpolicy.json"),
+				AddTestTrustStoreOption("e2e", filepath.Join(NotationE2EConfigPath, LocalkeysDirName, "new_e2e.crt")))
+
 			// the artifact signed with a different cert from the cert in
 			// trust store.
-			artifact := GenerateArtifact("e2e-with-expired-cert", "")
+			artifact := GenerateArtifact("e2e-valid-signature", "")
 
 			notation.ExpectFailure().Exec("verify", artifact.ReferenceWithDigest(), "-v").
 				MatchErrKeyWords("authenticity validation failed",
@@ -211,11 +218,14 @@ var _ = Describe("notation trust policy test", func() {
 	})
 
 	It("test audit signatureVerification level with invalid authenticity", func() {
-		Host(BaseOptions(), func(notation *utils.ExecOpts, _ *Artifact, vhost *utils.VirtualHost) {
-			vhost.SetOption(AddTrustPolicyOption("audit_trustpolicy.json"))
+		Host(nil, func(notation *utils.ExecOpts, _ *Artifact, vhost *utils.VirtualHost) {
+			vhost.SetOption(AuthOption("", ""),
+				AddTrustPolicyOption("audit_trustpolicy.json"),
+				AddTestTrustStoreOption("e2e", filepath.Join(NotationE2EConfigPath, LocalkeysDirName, "new_e2e.crt")))
+
 			// the artifact signed with a different cert from the cert in
 			// trust store.
-			artifact := GenerateArtifact("e2e-with-expired-cert", "")
+			artifact := GenerateArtifact("e2e-valid-signature", "")
 
 			notation.Exec("verify", artifact.ReferenceWithDigest(), "-v").
 				MatchKeyWords("Warning: authenticity was set to \"log\"",
@@ -244,6 +254,92 @@ var _ = Describe("notation trust policy test", func() {
 
 			notation.Exec("verify", artifact.ReferenceWithDigest(), "-v").
 				MatchKeyWords("Trust policy is configured to skip signature verification")
+		})
+	})
+
+	It("test override strict signatureVerification level with Expiry set to log", func() {
+		Host(BaseOptions(), func(notation *utils.ExecOpts, _ *Artifact, vhost *utils.VirtualHost) {
+			vhost.SetOption(AddTrustPolicyOption("override_strict_trustpolicy.json"))
+
+			artifact := GenerateArtifact("e2e-expired-signature", "")
+
+			notation.Exec("verify", artifact.ReferenceWithDigest(), "-v").
+				MatchKeyWords("digital signature has expired",
+					"expiry was set to \"log\"",
+					SuccessfullyVerified)
+		})
+	})
+
+	It("test override strict signatureVerification level with Authentic timestamp set to log", func() {
+		Host(nil, func(notation *utils.ExecOpts, _ *Artifact, vhost *utils.VirtualHost) {
+			artifact := GenerateArtifact("e2e-with-expired-cert", "")
+
+			vhost.SetOption(AuthOption("", ""),
+				AddTrustPolicyOption("override_strict_trustpolicy.json"),
+				AddTestTrustStoreOption("e2e", filepath.Join(NotationE2EConfigPath, "localkeys", "expired_e2e.crt")))
+
+			notation.Exec("verify", artifact.ReferenceWithDigest(), "-v").
+				MatchKeyWords("Warning: authenticTimestamp was set to \"log\"",
+					"error: certificate \"O=Internet Widgits Pty Ltd,ST=Some-State,C=AU\" is not valid anymore, it was expired",
+					SuccessfullyVerified)
+		})
+	})
+
+	It("test override strict signatureVerification level with Authenticity set to log", func() {
+		Host(nil, func(notation *utils.ExecOpts, _ *Artifact, vhost *utils.VirtualHost) {
+			vhost.SetOption(AuthOption("", ""),
+				AddTrustPolicyOption("override_strict_trustpolicy.json"),
+				AddTestTrustStoreOption("e2e", filepath.Join(NotationE2EConfigPath, LocalkeysDirName, "new_e2e.crt")))
+			// the artifact signed with a different cert from the cert in
+			// trust store.
+			artifact := GenerateArtifact("e2e-valid-signature", "")
+
+			notation.Exec("verify", artifact.ReferenceWithDigest(), "-v").
+				MatchKeyWords("Warning: authenticity was set to \"log\"",
+					"signature is not produced by a trusted signer",
+					SuccessfullyVerified)
+		})
+	})
+
+	It("test override permissive signatureVerification level with Expiry set to enforced", func() {
+		Host(BaseOptions(), func(notation *utils.ExecOpts, _ *Artifact, vhost *utils.VirtualHost) {
+			vhost.SetOption(AddTrustPolicyOption("override_permissive_trustpolicy.json"))
+
+			artifact := GenerateArtifact("e2e-expired-signature", "")
+
+			notation.ExpectFailure().Exec("verify", artifact.ReferenceWithDigest(), "-v").
+				MatchErrKeyWords("expiry validation failed.",
+					VerificationFailed)
+		})
+	})
+
+	It("test override permissive signatureVerification level with Authentic timestamp set to enforced", func() {
+		Host(nil, func(notation *utils.ExecOpts, _ *Artifact, vhost *utils.VirtualHost) {
+			vhost.SetOption(AddTrustPolicyOption("override_permissive_trustpolicy.json"))
+
+			artifact := GenerateArtifact("e2e-with-expired-cert", "")
+
+			vhost.SetOption(AuthOption("", ""),
+				AddTrustPolicyOption("trustpolicy.json"),
+				AddTestTrustStoreOption("e2e", filepath.Join(NotationE2EConfigPath, "localkeys", "expired_e2e.crt")))
+
+			notation.ExpectFailure().Exec("verify", artifact.ReferenceWithDigest(), "-v").
+				MatchErrKeyWords("authenticTimestamp validation failed",
+					VerificationFailed)
+		})
+	})
+	It("test override permissive signatureVerification level with Authenticity set to log", func() {
+		Host(nil, func(notation *utils.ExecOpts, _ *Artifact, vhost *utils.VirtualHost) {
+			vhost.SetOption(AuthOption("", ""),
+				AddTrustPolicyOption("override_permissive_trustpolicy.json"),
+				AddTestTrustStoreOption("e2e", filepath.Join(NotationE2EConfigPath, LocalkeysDirName, "new_e2e.crt")))
+
+			artifact := GenerateArtifact("e2e-valid-signature", "")
+
+			notation.Exec("verify", artifact.ReferenceWithDigest(), "-v").
+				MatchKeyWords("Warning: authenticity was set to \"log\"",
+					"signature is not produced by a trusted signer",
+					SuccessfullyVerified)
 		})
 	})
 })

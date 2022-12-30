@@ -5,11 +5,11 @@
             "name": "e2e",
             "registryScopes": [ "*" ],
             "signatureVerification": {
-                "level" : "strict",
+                "level" : "permissive",
                 "override" : {
-                    "revocation":"log",
-                    "expiry" : "log",
-                    "authenticTimestamp": "log",
+                    "revocation":"enforce",
+                    "expiry" : "enforce",
+                    "authenticTimestamp": "enforce",
                     "authenticity": "log"
                 }
             },

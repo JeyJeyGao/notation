@@ -5,12 +5,12 @@
             "name": "e2e",
             "registryScopes": [ "*" ],
             "signatureVerification": {
-                "level" : "strict",
+                "level" : "audit",
                 "override" : {
-                    "revocation":"log",
-                    "expiry" : "log",
-                    "authenticTimestamp": "log",
-                    "authenticity": "log"
+                    "revocation":"enforced",
+                    "expiry" : "enforced",
+                    "authenticTimestamp": "enforced",
+                    "authenticity": "enforced"
                 }
             },
             "trustStores": [ "ca:e2e" ],
