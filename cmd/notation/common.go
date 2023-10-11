@@ -14,6 +14,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/pflag"
@@ -67,7 +68,9 @@ func (opts *SecureFlagOpts) ApplyFlags(fs *pflag.FlagSet) {
 	setFlagPassword(fs, &opts.Password)
 	setFlagInsecureRegistry(fs, &opts.InsecureRegistry)
 	opts.Username = os.Getenv(defaultUsernameEnv)
+	fmt.Printf("Debug: Read NOTATION_USERNAME: %s\n", opts.Username)
 	opts.Password = os.Getenv(defaultPasswordEnv)
+	fmt.Printf("Debug: Read NOTATION_PASSWORD: %s\n", opts.Password)
 }
 
 // Credential returns an auth.Credential from opts.Username and opts.Password.
