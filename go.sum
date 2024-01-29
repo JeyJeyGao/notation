@@ -20,8 +20,6 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/notaryproject/notation-core-go v1.0.2 h1:VEt+mbsgdANd9b4jqgmx2C7U0DmwynOuD2Nhxh3bANw=
 github.com/notaryproject/notation-core-go v1.0.2/go.mod h1:2HkQzUwg08B3x9oVIztHsEh7Vil2Rj+tYgxH+JObLX4=
-github.com/notaryproject/notation-go v1.1.0 h1:7WBeH8FGoA+GkeUwmBIBnlJc/PpdYaUKfiXu6ZZeEeg=
-github.com/notaryproject/notation-go v1.1.0/go.mod h1:ZSk34URQar5fnWflaFByzpDvuefgZKm/mp8Q2tQpBaw=
 github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/opencontainers/image-spec v1.1.0-rc5 h1:Ygwkfw9bpDvs+c9E34SdgGOj41dX/cbdlwvlWt0pnFI=

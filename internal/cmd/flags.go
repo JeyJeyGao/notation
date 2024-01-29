@@ -122,6 +122,10 @@ var (
 	SetPflagOutput   = func(fs *pflag.FlagSet, p *string, usage string) {
 		fs.StringVarP(p, PflagOutput.Name, PflagOutput.Shorthand, OutputPlaintext, usage)
 	}
+	PflagTagSigningUsage = "set the tag signing tag name"
+	SetPflagTagSigning   = func(fs *pflag.FlagSet, p *string, usage string) {
+		fs.StringVarP(p, "tag", "", "", usage)
+	}
 )
 
 // KeyValueSlice is a flag with type int
