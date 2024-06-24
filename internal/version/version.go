@@ -15,7 +15,7 @@ package version
 
 var (
 	// Version shows the current notation version, optionally with pre-release.
-	Version = "v1.2.0-revocationNoTimeout"
+	Version = "v1.2.0-NoCheckOCSPIssuer"
 
 	// BuildMetadata stores the build metadata.
 	//
