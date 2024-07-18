@@ -15,6 +15,7 @@ package command
 
 import (
 	"fmt"
+	"path/filepath"
 	"time"
 
 	. "github.com/notaryproject/notation/test/e2e/internal/notation"
@@ -255,6 +256,56 @@ var _ = Describe("notation sign", func() {
 
 			OldNotation().Exec("verify", artifact.DomainReferenceWithDigest()).
 				MatchKeyWords(VerifySuccessfully)
+		})
+	})
+
+	It("with timestamping", func() {
+		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
+			notation.Exec("sign", "--timestamp-url", "http://rfc3161timestamp.globalsign.com/advanced", "--timestamp-root-cert", filepath.Join(NotationE2EConfigPath, "timestamp", "globalsignTSARoot.cer"), artifact.ReferenceWithDigest()).
+				MatchKeyWords(SignSuccessfully)
+		})
+	})
+
+	It("with timestamp-root-cert but no timestamp-url", func() {
+		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
+			notation.ExpectFailure().Exec("sign", "--timestamp-root-cert", filepath.Join(NotationE2EConfigPath, "timestamp", "globalsignTSARoot.cer"), artifact.ReferenceWithDigest()).
+				MatchErrKeyWords("Error: if any flags in the group [timestamp-url timestamp-root-cert] are set they must all be set; missing [timestamp-url]")
+		})
+	})
+
+	It("with timestamp-url but no timestamp-root-cert", func() {
+		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
+			notation.ExpectFailure().Exec("sign", "--timestamp-url", "http://rfc3161timestamp.globalsign.com/advanced", artifact.ReferenceWithDigest()).
+				MatchErrKeyWords("Error: if any flags in the group [timestamp-url timestamp-root-cert] are set they must all be set; missing [timestamp-root-cert]")
+		})
+	})
+
+	It("with empty tsa server", func() {
+		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
+			notation.ExpectFailure().Exec("sign", "--timestamp-url", "", "--timestamp-root-cert", filepath.Join(NotationE2EConfigPath, "timestamp", "globalsignTSARoot.cer"), artifact.ReferenceWithDigest()).
+				MatchErrKeyWords("Error: timestamping: tsa url cannot be empty")
+		})
+	})
+
+	It("with empty tsa root cert", func() {
+		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
+			notation.ExpectFailure().Exec("sign", "--timestamp-url", "dummy", "--timestamp-root-cert", "", artifact.ReferenceWithDigest()).
+				MatchErrKeyWords("Error: timestamping: tsa root certificate path cannot be empty")
+		})
+	})
+
+	It("with invalid tsa server", func() {
+		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
+			notation.ExpectFailure().Exec("sign", "--timestamp-url", "http://invalid.com", "--timestamp-root-cert", filepath.Join(NotationE2EConfigPath, "timestamp", "globalsignTSARoot.cer"), artifact.ReferenceWithDigest()).
+				MatchErrKeyWords("Error: timestamp: Post \"http://invalid.com\"").
+				MatchErrKeyWords("server misbehaving")
+		})
+	})
+
+	It("with invalid tsa root certificate", func() {
+		Host(BaseOptions(), func(notation *utils.ExecOpts, artifact *Artifact, vhost *utils.VirtualHost) {
+			notation.ExpectFailure().Exec("sign", "--timestamp-url", "http://timestamp.digicert.com", "--timestamp-root-cert", filepath.Join(NotationE2EConfigPath, "timestamp", "invalid.crt"), artifact.ReferenceWithDigest()).
+				MatchErrKeyWords("Error: x509: malformed certificate")
 		})
 	})
 })

@@ -3,13 +3,15 @@ module github.com/notaryproject/notation
 go 1.22
 
 require (
-	github.com/notaryproject/notation-core-go v1.0.4-0.20240708015912-faac9b7f3f10
-	github.com/notaryproject/notation-go v1.1.1
+	github.com/notaryproject/notation-core-go v1.0.4-0.20240716001320-f45197cbd53b
+	github.com/notaryproject/notation-go v1.1.1-0.20240715044011-b52583166f2b
+	github.com/notaryproject/tspclient-go v0.1.1-0.20240715235637-df25ef8d2172
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
+	golang.org/x/net v0.22.0
 	golang.org/x/term v0.22.0
 	oras.land/oras-go/v2 v2.5.0
 )
@@ -23,7 +25,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/notaryproject/notation-plugin-framework-go v1.0.0 // indirect
-	github.com/notaryproject/tspclient-go v0.1.0 // indirect
 	github.com/veraison/go-cose v1.1.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/crypto v0.25.0 // indirect
