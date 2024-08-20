@@ -235,8 +235,10 @@ func getVerifier(ctx context.Context) (notation.Verifier, error) {
 	}
 	x509TrustStore := truststore.NewX509TrustStore(dir.ConfigFS())
 	ocspHttpClient := httputil.NewClient(ctx, &http.Client{Timeout: 2 * time.Second})
+	crlHTTPClient := httputil.NewClient(ctx, &http.Client{Timeout: 2 * time.Second})
 	revocationCodeSigningValidator, err := revocation.NewWithOptions(revocation.Options{
 		OCSPHTTPClient:   ocspHttpClient,
+		CRLHTTPClient:    crlHTTPClient,
 		CertChainPurpose: purpose.CodeSigning,
 	})
 	if err != nil {
@@ -244,6 +246,7 @@ func getVerifier(ctx context.Context) (notation.Verifier, error) {
 	}
 	revocationTimestampingValidator, err := revocation.NewWithOptions(revocation.Options{
 		OCSPHTTPClient:   ocspHttpClient,
+		CRLHTTPClient:    crlHTTPClient,
 		CertChainPurpose: purpose.Timestamping,
 	})
 	if err != nil {
