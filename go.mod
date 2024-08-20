@@ -28,7 +28,11 @@ require (
 	github.com/veraison/go-cose v1.1.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/crypto v0.26.0 // indirect
-	golang.org/x/mod v0.19.0 // indirect
+	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.23.0 // indirect
 )
+
+replace github.com/notaryproject/notation-go => github.com/JeyJeyGao/notation-go v1.0.0-rc.6.0.20240820072027-640b3bbec307
+
+replace github.com/notaryproject/notation-core-go => github.com/JeyJeyGao/notation-core-go v0.0.0-20240820065505-3bb154fda9f6
