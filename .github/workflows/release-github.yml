@@ -24,6 +24,7 @@ permissions:
 jobs:
   build:
     permissions:
+      id-token: write
       contents: write  # for goreleaser/goreleaser-action to create a GitHub release
     name: Release Notation Binaries
     runs-on: ubuntu-24.04
@@ -45,6 +46,20 @@ jobs:
         run: |
           pre_tag=`git tag --sort=-creatordate --list 'v*' | grep -v dev | head -2 | tail -1`
           echo "GORELEASER_PREVIOUS_TAG=$pre_tag" >> $GITHUB_ENV
+      - name: setup Notation CLI
+        uses: notaryproject/notation-action/setup@v1
+        with:
+          url: https://github.com/JeyJeyGao/notation/releases/download/v2.0.0-goreleaser2/notation_2.0.0-goreleaser2_linux_amd64.tar.gz
+          checksum: 37f673be63fdfbd7e72df4136dc3330f92b39f7d773644f590f2658396e6ff8a
+      - name: Install Notatio AKV plugin
+        run: |
+          notation plugin install --url https://github.com/Azure/notation-azure-kv/releases/download/v1.2.1/notation-azure-kv_1.2.1_linux_amd64.tar.gz --sha256sum 67c5ccaaf28dd44d2b6572684d84e344a02c2258af1d65ead3910b3156d3eaf5
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 # v6.2.1
         with:
