@@ -30,6 +30,7 @@ func Cmd() *cobra.Command {
 		verifyCommand(nil),
 		policy.Cmd(),
 		inspectCommand(),
+		quickVerifyCommand(nil),
 	)
 	return command
 }

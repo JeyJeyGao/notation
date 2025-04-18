@@ -16,6 +16,7 @@ package verify
 
 import (
 	"context"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -69,6 +70,56 @@ func GetBlobVerifier(ctx context.Context) (Verifier, error) {
 	}
 	verifierOptions.BlobTrustPolicy = blobPolicyDocument
 	return verifier.NewVerifierWithOptions(x509TrustStore, verifierOptions)
+}
+
+// GetBlobQuickVerifier creates a BlobVerifier.
+func GetBlobQuickVerifier(ctx context.Context, cert *x509.Certificate, trustedIdentities []string) (Verifier, error) {
+	verifierOptions, err := newVerifierOptions(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// trust policy and trust store
+	x509TrustStore := newMemoryTrustStore(cert)
+	blobPolicyDocument := newMemoryBlobTrustPolicy(trustedIdentities)
+	verifierOptions.BlobTrustPolicy = blobPolicyDocument
+	return verifier.NewVerifierWithOptions(x509TrustStore, verifierOptions)
+}
+
+// MemoryTrustStore is an implementation of the X509TrustStore interface that
+// stores certificates in memory and returns them when requested.
+type MemoryTrustStore struct {
+	certs []*x509.Certificate
+}
+
+// GetCertificates returns the certificates stored in memory.
+// It ignores the storeType and namedStore parameters.
+func (m *MemoryTrustStore) GetCertificates(_ context.Context, _ truststore.Type, _ string) ([]*x509.Certificate, error) {
+	return m.certs, nil
+}
+
+// newMemoryTrustStore creates a new MemoryTrustStore with the provided certificate.
+func newMemoryTrustStore(cert *x509.Certificate) *MemoryTrustStore {
+	return &MemoryTrustStore{
+		certs: []*x509.Certificate{cert},
+	}
+}
+
+func newMemoryBlobTrustPolicy(trustedIdentities []string) *trustpolicy.BlobDocument {
+	return &trustpolicy.BlobDocument{
+		Version: "1.0",
+		TrustPolicies: []trustpolicy.BlobTrustPolicy{
+			{
+				Name: "default",
+				SignatureVerification: trustpolicy.SignatureVerification{
+					VerificationLevel: trustpolicy.LevelStrict.Name,
+				},
+				TrustedIdentities: trustedIdentities,
+				TrustStores:       []string{"ca:default"},
+				GlobalPolicy:      true,
+			},
+		},
+	}
 }
 
 // newVerifierOptions creates a verifier.VerifierOptions.
