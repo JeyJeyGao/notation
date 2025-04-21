@@ -14,13 +14,16 @@
 package blob
 
 import (
+	"crypto/sha256"
 	"crypto/x509"
+	"encoding/hex"
 	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/notaryproject/notation-go"
 	"github.com/notaryproject/notation/v2/cmd/notation/internal/display"
@@ -32,15 +35,16 @@ import (
 
 type blobQuickVerifyOpts struct {
 	flag.LoggingFlagOpts
-	printer         *output.Printer
-	blobPath        string
-	signaturePath   string
-	pluginConfig    []string
-	userMetadata    []string
-	blobMediaType   string
-	certificate     string
-	certificateURL  string
-	trustedIdentity string
+	printer           *output.Printer
+	blobPath          string
+	signaturePath     string
+	pluginConfig      []string
+	userMetadata      []string
+	blobMediaType     string
+	certificate       string
+	certificateURL    string
+	certificateSHA256 string
+	trustedIdentity   string
 }
 
 func quickVerifyCommand(opts *blobQuickVerifyOpts) *cobra.Command {
@@ -82,6 +86,12 @@ Example - Quick verify a signature on a blob artifact with media type:
 			if opts.certificate != "" && opts.certificateURL != "" {
 				return errors.New("cannot use both --certificate and --certificate-url")
 			}
+			if opts.certificateSHA256 != "" && opts.certificate != "" {
+				return errors.New("--certificate-sha256-fingerprint can only be used with --certificate-url")
+			}
+			if opts.certificateURL != "" && opts.certificateSHA256 == "" {
+				cmd.PrintErrf("Warning: Downloading certificate without verifying fingerprint. Consider using --certificate-sha256-fingerprint for security.\n")
+			}
 			if opts.trustedIdentity == "" {
 				return errors.New("--trusted-identity is required")
 			}
@@ -99,6 +109,7 @@ Example - Quick verify a signature on a blob artifact with media type:
 	command.Flags().StringVarP(&opts.signaturePath, "signature", "s", "", "filepath of the signature to be verified")
 	command.Flags().StringVar(&opts.certificate, "certificate", "", "filepath of the certificate to verify the signature")
 	command.Flags().StringVar(&opts.certificateURL, "certificate-url", "", "URL to download the certificate to verify the signature")
+	command.Flags().StringVar(&opts.certificateSHA256, "certificate-sha256-fingerprint", "", "SHA-256 fingerprint of the certificate to verify when downloading from URL")
 	command.Flags().StringVar(&opts.trustedIdentity, "trusted-identity", "", "trusted identity for signature verification (e.g. x509.subject=CN=example)")
 	command.Flags().StringArrayVar(&opts.pluginConfig, "plugin-config", nil, "{key}={value} pairs that are passed as it is to a plugin, if the verification is associated with a verification plugin, refer plugin documentation to set appropriate values")
 	command.Flags().StringVar(&opts.blobMediaType, "media-type", "", "media type of the blob to verify")
@@ -170,6 +181,23 @@ func runQuickVerify(command *cobra.Command, cmdOpts *blobQuickVerifyOpts) error 
 		cert, err = parseCertificate(certBytes)
 		if err != nil {
 			return fmt.Errorf("failed to parse certificate: %w", err)
+		}
+
+		if cmdOpts.certificateSHA256 == "" {
+			return fmt.Errorf("certificate fingerprint verification is required when downloading from URL")
+		}
+
+		// Calculate SHA-256 fingerprint of the downloaded certificate
+		fingerprint := sha256.Sum256(cert.Raw)
+		calculatedFingerprint := hex.EncodeToString(fingerprint[:])
+
+		// Clean up user-provided fingerprint (remove colons, spaces, and convert to lowercase)
+		expectedFingerprint := strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(cmdOpts.certificateSHA256, ":", ""), " ", ""))
+
+		// Compare fingerprints
+		if calculatedFingerprint != expectedFingerprint {
+			return fmt.Errorf("certificate fingerprint verification failed: expected %s, got %s",
+				expectedFingerprint, calculatedFingerprint)
 		}
 	}
 
